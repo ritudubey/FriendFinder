@@ -18,6 +18,8 @@
         <input type="text" name="" id="name" class="form-control" required="">
         <h4> Link to Photo Image </h4>
         <input type="text" name="" id="photo" class="form-control" required="">
+        <!--<input type="file"  id="photo" onchange="previewFile()"><br>
+         <img src="" height="200" alt="Image preview...">-->
 
         <h3><strong>Question 1</strong></h3>
         <h4>You like music</h4>
@@ -135,6 +137,18 @@
         Submit</button>
 
     </div>
+
+   <div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div id="caption"></div>
+    <img class="modal-content" id="img01">
+    <p>Some text in the Modal..</p>
+  </div>
+
+</div>
 </body>
 </html>
 <script>
@@ -172,6 +186,7 @@
         if (data) {
             alert("Yay! Your choices have been added!");
             console.log("Best match = " + data);
+            displayModal(data.name, data.pic);
              $("#name").val("");
             $("#photo").val("");
             $("#q1").val("");
@@ -190,6 +205,54 @@
            
         });
 
-    })
+    });
+
+function displayModal(name, pic){
+    // Get the modal
+var modal = document.getElementById('myModal');
+
+// Get the button that opens the modal
+// var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+var captionText = document.getElementById("caption");
+var modalImg = document.getElementById("img01");
+// When the user clicks on the button, open the modal 
+    modal.style.display = "block";
+    modalImg.src = pic;
+    captionText.innerHTML = name;
+
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+}
+
+//      function previewFile(){
+//        var preview = document.querySelector('img'); //selects the query named img
+//        var file    = document.querySelector('input[type=file]').files[0]; //sames as here
+//        var reader  = new FileReader();
+
+//        reader.onloadend = function () {
+//            preview.src = reader.result;
+//        }
+
+//        if (file) {
+//            reader.readAsDataURL(file); //reads the data as a URL
+//        } else {
+//            preview.src = "";
+//        }
+//   }
+
+//   previewFile();  
 
 </script>

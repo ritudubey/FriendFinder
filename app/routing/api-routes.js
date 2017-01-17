@@ -4,107 +4,77 @@
 // These data sources hold arrays of information on table-data, waitinglist, etc.
 // ===============================================================================
 
-var friendList = require("../data/friends.js");
+//var friendList = require("../data/friends.js");
+var friendList = { table: [] };
 var fs = require("fs");
 
 // ===============================================================================
 // ROUTING
 // ===============================================================================
 
-module.exports = function(app) {
-  // API GET Requests
-  // Below code handles when users "visit" a page.
-  // In each of the below cases when a user visits a link
-  // (ex: localhost:PORT/api/admin... they are shown a JSON of the data in the table)
-  // ---------------------------------------------------------------------------
+module.exports = function (app) {
 
-  // app.get("/api/friend", function(req, res) {
-  //   //algorithm to find the best match
-  //   var friendmatch;
-  //   var minScore;
-  //   var self = req.params.name;
-  //   for(var i=0; i< friendList.length; i++) {
-  //     if (friendList[i].name != self) {
-  //       // calculate score
-  //     }
-  //   }
-  //   res.json(friendmatch);
-  // });
-
-  // API POST Requests
-  // Below code handles when a user submits a form and thus submits data to the server.
-  // In each of the below cases, when a user submits form data (a JSON object)
-  // ...the JSON is pushed to the appropriate Javascript array
-  // (ex. User fills out a reservation request... this data is then sent to the server...
-  // Then the server saves the data to the tableData array)
-  // ---------------------------------------------------------------------------
-
-
-
-function fileWrite(err){
-  if(err) {
-    return console.log(err);
-  }else {
-    console.log("friend list updated");
-  }
-}
-
-
-  app.post("/api/choices", function(req, res) {
-    // Note the code here. Our "server" will respond to requests and let users know if they have a table or not.
-    // It will do this by sending out the value "true" have a table
-    var body = 
-  {
-    name: "dummy",
-    pic: "dummy.jpg",
-    preferences: ['3', '2', '5', '3' , '1', '1', '2', '5', '3' , '1']
-  };
-
-      fs.readFile('friends.txt', function(err, data){
-            if(err) console.log(err);
-            console.log(data);
-        });
-
-      var friendmatch;
-      var minScore = 999;
-      var score;
-    for(var i=0; i< friendList.length; i++) {
-      if (friendList[i].name != body.name) {
-        // calculate score
-        console.log("Comparing " + body.name + " with " + friendList[i].name);
-        for(var j=0 ; j< friendList[i].preferences.length; j++) {
-          if(body.preferences[j] === undefined) {
-            console.log("preferences cannot be undefined");
-            res.json(false);
-          }else{
-          score += Math.abs(friendList[i].preferences[j] - body.preferences[j]);
-        }
-        }
-         console.log("calculate score="+score+" for="+friendList[i].preferences + " and "+ req.body.preferences);
-       
-        if (score < minScore){
-          minScore = score;
-          friendmatch = friendList[i];
-          console.log("score="+minScore+" match="+friendmatch)
-        }
-
-      }
+  function fileWrite(err) {
+    if (err) {
+      return console.log(err);
+    } else {
+      console.log("friend list updated");
     }
-    friendList.push(req.body);
-    fs.appendFile("friends.txt", JSON.stringify(eq.body), fileWrite);
-  res.json(friendmatch);
+  }
 
+  app.post("/api/choices", function (req, res) {
+
+    var file = 'app/data/friends.json';
+    fs.readFile(file, 'utf8', function (err, obj) {
+      if (err) { 
+        console.log(err); 
+      }
+      else {
+        friendList = JSON.parse(obj);
+
+        var friendmatch;
+        var minScore = 999;
+        var score = 0;
+
+        if (req.body.preferences && req.body.preferences.length != 10) {
+          console.log("preferences cannot be undefined");
+          return res.json(false);
+        }
+        for (var i = 0; i < friendList.length; i++) {
+          if (friendList[i].name != req.body.name) {
+            // calculate score
+            score = 0;
+            console.log("Comparing " + req.body.name + " with " + friendList[i].name);
+            for (var j = 0; j < friendList[i].preferences.length; j++) {
+              if (req.body.preferences[j] === "") {
+                console.log("preferences cannot be undefined");
+                return res.json(false);
+              }
+              score = score + parseInt(Math.abs(parseInt(friendList[i].preferences[j]) - parseInt(req.body.preferences[j])));
+            }
+            console.log("calculate score=" + score + " for=" + friendList[i].preferences + " and " + req.body.preferences);
+
+            if (score < minScore) {
+              minScore = score;
+              friendmatch = friendList[i];
+              console.log("score=" + minScore + " match=" + friendmatch)
+            }
+
+          }
+        }
+        friendList.push(req.body);
+        fs.writeFile(file, JSON.stringify(friendList), 'utf8', fileWrite);
+        res.json(friendmatch);
+      }
+    });
   });
 
-  // ---------------------------------------------------------------------------
-  // I added this below code so you could clear out the table while working with the functionality.
-  // Don"t worry about it!
 
-  app.post("/api/clear", function() {
+  app.post("/api/clear", function () {
     // Empty out the arrays of data
     tableData = [];
     waitListData = [];
 
     console.log(tableData);
   });
-};
+}
